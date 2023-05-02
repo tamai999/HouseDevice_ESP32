@@ -19,6 +19,9 @@
 
 #define RUN_INTERVAL   600        // 送信間隔（10分）
 
+#define WIFI_RETRY_COUNT 4        // WiFi接続リトライ回数
+#define RUN_AFTER_WIFI_FAILED 180 // WiFi接続失敗後の再起動時間（3分）
+
 // ======================================
 // HTTPS用ルート証明書
 // ======================================
@@ -217,9 +220,22 @@ void setup()
 
   // WiFiに接続
   serialLog("Waiting for WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    serialLog(".");
+  for (int i = 0; i <= WIFI_RETRY_COUNT; i++) {
+    if (WiFi.status() != WL_CONNECTED) {
+      if (i == WIFI_RETRY_COUNT) {
+        // 接続失敗
+        serialLog("Faild to Conenct WiFi.");
+        // 一定時間後に再起動
+        esp_sleep_enable_timer_wakeup(RUN_AFTER_WIFI_FAILED * 1000 * 1000);
+        esp_deep_sleep_start();
+      }
+
+      delay(1000);
+      serialLog(".");
+    } else {
+      // 接続成功
+      break;
+    }
   }
   // 接続成功
   serialLog("WiFi Connected.");
