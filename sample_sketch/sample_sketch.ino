@@ -176,8 +176,8 @@ void setup()
   // ======================================
   // 温湿度取得
   // ======================================
-  float humidity = 0;
-  float houseTemp = 0;
+  float humidity = -999.0;
+  float houseTemp = -999.0;
 
   for (int i = 0; i < 5; i++) {
     int updateRet = rht.update();
@@ -249,16 +249,32 @@ void setup()
 
   String url = "https://asia-northeast1-vhousem.cloudfunctions.net/w?";
   url.concat("did=" + String(DEVICE_ID) + "&pc=" + String(PASSCODE));
-  url.concat("&wifi=");
-  url.concat(rssi);
-  url.concat("&ht=");
-  url.concat(houseTemp);
-  url.concat("&st=");
-  url.concat(soilTemp);
-  url.concat("&h=");
-  url.concat((int)humidity);
-  url.concat("&ot=");
-  url.concat(outerTemp);
+
+  if (-200.0 <= rssi && rssi <= 0.0) {
+    url.concat("&wifi=");
+    url.concat(rssi);
+  }
+
+  if (-50.0 <= houseTemp && houseTemp <= 100.0) {
+    url.concat("&ht=");
+    url.concat(houseTemp);
+  }
+
+  if (-50.0 <= soilTemp && soilTemp <= 100.0) {
+    url.concat("&st=");
+    url.concat(soilTemp);
+  }
+
+  if (0.0 <= humidity && humidity <= 100.0) {
+    url.concat("&h=");
+    url.concat((int)humidity);
+  }
+
+  if (0.0 <= outerTemp && outerTemp <= 100.0) {
+    url.concat("&ot=");
+    url.concat(outerTemp);
+  }
+
   bool result = httpGet(url);
 
   if (result) {
