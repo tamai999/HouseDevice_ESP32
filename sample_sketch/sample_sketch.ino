@@ -183,9 +183,20 @@ void setup()
     int updateRet = rht.update();
     if (updateRet == 1) {
       humidity = rht.humidity();
-      houseTemp = rht.tempC();
+      float rawTemp = rht.tempC();
+
+      // RHT03/DHT22の負の温度補正
+      // センサーはMSBを符号ビットとして使用（0x8000 = -0.0℃）
+      // ライブラリのバグで3276.8℃（32768/10）以上になる場合は負の温度
+      if (rawTemp >= 3276.8) {
+        // 32768を引いて負の値に変換: (rawTemp - 3276.8) = 実際の絶対値
+        houseTemp = -(rawTemp - 3276.8);
+      } else {
+        houseTemp = rawTemp;
+      }
+
       serialLog("Humidity: " + String(humidity, 1) + " %");
-      serialLog("House Temp: " + String(houseTemp, 1) + " C");
+      serialLog("House Temp (corrected): " + String(houseTemp, 1) + " C");
       break;
     } else {
       serialLog("Did fail to get temperature/humidity. wait for retry.");
