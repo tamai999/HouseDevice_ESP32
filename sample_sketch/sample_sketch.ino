@@ -281,7 +281,7 @@ void setup()
     url.concat((int)humidity);
   }
 
-  if (0.0 <= outerTemp && outerTemp <= 100.0) {
+  if (-50.0 <= outerTemp && outerTemp <= 100.0) {
     url.concat("&ot=");
     url.concat(outerTemp);
   }
